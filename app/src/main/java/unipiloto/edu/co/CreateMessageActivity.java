@@ -35,12 +35,36 @@ public class CreateMessageActivity extends AppCompatActivity {
         ScrollView scrollView = findViewById(R.id.scrollViewMessages);
 
         if (messageSent != null && !messageSent.equals("")) {
-            MessageElement messageElement = new MessageElement("1", messageSent, "SecondActivity", "MainActivity", this);
+            HistoryConversation myConversation = loadConversation(this, "conversation");
+            MessageElement messageElement = new MessageElement(myConversation.size+"", messageSent, "SecondActivity");
             saveConversation(this, messageElement);
 
-            HistoryConversation myConversation = loadConversation(this, "conversation");
-            for (MessageElement msg: myConversation.myConversation) {
-                container.addView(msg.messageTextView);
+            for (MessageElement msg: loadConversation(this, "conversation").myConversation) {
+                TextView messageTextView = new TextView(this);
+                messageTextView.setBackground(getResources().getDrawable(R.drawable.textview_rounded_background));
+                messageTextView.setTextColor(getResources().getColor(R.color.light_gray));
+                messageTextView.setPadding(40, 20, 40, 20);
+
+                ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT
+                );
+                if (msg.transmitter.equals("MainActivity")) {
+                    layoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
+                } else {
+                    layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
+                }
+                messageTextView.setLayoutParams(layoutParams);
+                messageTextView.setText(msg.messageReceived);
+
+
+                ConstraintLayout cont = new ConstraintLayout(this);
+                cont.setLayoutParams(new ConstraintLayout.LayoutParams(
+                        ConstraintLayout.LayoutParams.MATCH_PARENT,
+                        ConstraintLayout.LayoutParams.WRAP_CONTENT
+                ));
+                cont.addView(messageTextView);
+                container.addView(cont);
             }
         } else {
             HistoryConversation newConversation = new HistoryConversation();
@@ -92,28 +116,12 @@ public class CreateMessageActivity extends AppCompatActivity {
     public class MessageElement implements Serializable {
         public String id_element;
         public String transmitter;
-        public TextView messageTextView;
+        public String messageReceived;
 
-        MessageElement(String idElement, String messageReceived, String transmitter, String primaryActivity, Context context) {
+        MessageElement(String idElement, String messageReceived, String transmitter) {
             this.id_element = idElement;
             this.transmitter = transmitter;
-
-            this.messageTextView = new TextView(context);
-            this.messageTextView.setBackground(getResources().getDrawable(R.drawable.textview_rounded_background));
-            this.messageTextView.setTextColor(getResources().getColor(R.color.light_gray));
-            this.messageTextView.setPadding(20, 10, 20, 10);
-
-            ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
-                    ConstraintLayout.LayoutParams.MATCH_PARENT,
-                    ConstraintLayout.LayoutParams.WRAP_CONTENT
-            );
-            if (this.transmitter.equals(primaryActivity)) {
-                layoutParams.endToEnd = ConstraintLayout.LayoutParams.PARENT_ID;
-            } else {
-                layoutParams.startToStart = ConstraintLayout.LayoutParams.PARENT_ID;
-            }
-            this.messageTextView.setLayoutParams(layoutParams);
-            this.messageTextView.setText(messageReceived);
+            this.messageReceived = messageReceived;
         }
     }
 
